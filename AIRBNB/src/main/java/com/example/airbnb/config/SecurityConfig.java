@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
 
@@ -34,7 +35,7 @@ public class SecurityConfig {
 
 //    if anyone enters then
 
-    @Bean
+        @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
@@ -45,4 +46,14 @@ public class SecurityConfig {
 
         return http.build();
     }
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        return http
+//                .csrf(csrf -> csrf.disable())
+//                .authorizeHttpRequests(request -> request.anyRequest().authenticated())
+//                .httpBasic(Customizer.withDefaults())
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .build();
+//
+//    }
 }
