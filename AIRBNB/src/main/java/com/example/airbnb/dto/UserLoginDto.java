@@ -8,6 +8,7 @@ public class UserLoginDto {
         // Getters and Setters
 
     public String getEmailLogin() {
+
         return email;
     }
     public void setEmailLogin(String email) {
@@ -18,6 +19,7 @@ public class UserLoginDto {
         return password;
     }
     public void setPasswordLogin(String password) {
+
         this.password = password;
     }
 

@@ -19,36 +19,23 @@ public class LoginController {
     @Autowired
     private UserService userService;
 
-//    @PostMapping("/login")
-//    public ResponseEntity<?> login(@RequestBody UserLoginDto loginDto, HttpServletResponse response) {
-//            Map<String, String> tokens = userService.loginUser(loginDto);
-//
-//            // Set Access Token in Cookie
-//            ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.get("accessToken"))
-//                    .httpOnly(true).path("/").maxAge(300).build();
-//
-//            // Set Refresh Token in Cookie
-//            ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.get("refreshToken"))
-//                    .httpOnly(true).path("/").maxAge(600).build();
-//
-//            response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-//            response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-//
-//            return ResponseEntity.ok("Login Successful! Cookies set.");
-//        }
-@PostMapping("/login")
-public ResponseEntity<?> login(@RequestBody UserLoginDto loginDto, HttpServletResponse response) {
-    try {
-        Map<String, String> tokens = userService.loginUser(loginDto);
-        // ... (existing cookie logic)
-        return ResponseEntity.ok("Login Successful!");
-    } catch (Exception e) {
-        // Print the error to your IntelliJ console
-        e.printStackTrace();
-        // Send the error message to Postman
-        return ResponseEntity.status(500).body("Internal Error: " + e.getMessage());
-    }
-}
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserLoginDto loginDto, HttpServletResponse response) {
+            Map<String, String> tokens = userService.loginUser(loginDto);
+
+            // Set Access Token in Cookie
+            ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.get("accessToken"))
+                    .httpOnly(true).maxAge(300).build();
+
+            // Set Refresh Token in Cookie
+            ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.get("refreshToken"))
+                    .httpOnly(true).maxAge(600).build();
+
+            response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+            response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+            return ResponseEntity.ok("Login Successful! Cookies set.");
+        }
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@CookieValue("refreshToken") String refreshToken, HttpServletResponse response) {

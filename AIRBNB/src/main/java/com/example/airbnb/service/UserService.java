@@ -67,8 +67,7 @@ public class UserService {
         User user = new User();
         user.setEmail(dto.getEmail());
         user.setFullName(dto.getFullName());
-            // Convert the String from DTO into the Role Enum
-            user.setRole(Role.valueOf(dto.getRole()));
+        user.setRole(Role.valueOf(dto.getRole())); // Convert the String from DTO into the Role Enum
 
         // 3. Hash the password from the DTO
         user.setPassword(encoder.encode(dto.getPassword()));
@@ -87,13 +86,13 @@ public class UserService {
     public Map<String, String> loginUser(UserLoginDto loginDto) {
         // 1. Find User
         User user = userRepository.findByEmail(loginDto.getEmailLogin())
-                .orElseThrow(() -> new RuntimeException("Invalid Email or Password"));
+                .orElseThrow(() -> new RuntimeException("Invalid Email !!!"));
 
         // 2. Compare Bcrypt Passwords (Salt is handled automatically here)
 
 
         if (!passwordEncoder.matches(loginDto.getPasswordLogin(), user.getPassword())) {
-            throw new RuntimeException("Invalid Email or Password");
+            throw new RuntimeException("Invalid Password");
         }
 
         // 3. Create Tokens (5 min access, 10 min refresh)

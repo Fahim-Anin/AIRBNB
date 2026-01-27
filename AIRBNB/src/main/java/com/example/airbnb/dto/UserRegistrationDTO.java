@@ -1,17 +1,20 @@
 package com.example.airbnb.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class UserRegistrationDTO {
         private String email;
         private String password;
+        @JsonProperty("full_name")
         private String fullName;
         private String role; // Or use an Enum
-
 
 
         // Add Getters and Setters
         // IMPORTANT: You MUST have these getters for the Service to work
 
     public String getEmail() {
+
         return email;
     }
     public void setEmail(String email) {
@@ -25,7 +28,9 @@ public class UserRegistrationDTO {
         this.password = password;
     }
 
-    public String getFullName() { return fullName; }
+    public String getFullName() {
+        return fullName;
+    }
     public void setFullName(String fullName) { this.fullName = fullName; }
 
     public String getRole() { return role; }
