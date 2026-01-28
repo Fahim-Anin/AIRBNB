@@ -1,8 +1,9 @@
 package com.example.airbnb.service;
+import com.example.airbnb.dto.UserLoginDto;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Map;
 import java.util.Optional;
-import com.example.airbnb.dto.UserLoginDto;
+// import com.example.airbnb.dto.UserLoginDto;
 import com.example.airbnb.dto.UserRegistrationDTO;
 import com.example.airbnb.model.Role;
 import com.example.airbnb.model.User;
@@ -20,10 +21,13 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private JwtService jwtService;
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
-    @Autowired
     private PasswordEncoder passwordEncoder;
+//    @Autowired
+    //private JwtService jwtService;
+//    @Autowired
+    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+//    @Autowired
+//    private PasswordEncoder passwordEncoder;
 
 //    public String registration(User user) {
 
@@ -55,13 +59,15 @@ public class UserService {
 
 //        Using DTO
 
-
         public String registration(UserRegistrationDTO dto) {
 
-        // 1. Validation (use the DTO fields)
-        if (dto.getEmail() == null || dto.getEmail().isEmpty()) {
-            return "Fail: Email is required!";
-        }
+            if (dto.getEmail() == null || dto.getEmail().isEmpty() ||
+                dto.getPassword() == null || dto.getPassword().isEmpty() ||
+                dto.getFullName() == null || dto.getFullName().isEmpty() ||
+                 dto.getRole() == null) {
+
+            return "Fail: Email, Password, or Full Name, role cannot be empty!";
+      }
 
         // 2. Create the actual Entity object
         User user = new User();
@@ -81,32 +87,42 @@ public class UserService {
     public List<User> usersList() {
         return userRepository.findAll();
     }
-
-
-    public Map<String, String> loginUser(UserLoginDto loginDto) {
-        // 1. Find User
-        User user = userRepository.findByEmail(loginDto.getEmailLogin())
-                .orElseThrow(() -> new RuntimeException("Invalid Email !!!"));
-
-        // 2. Compare Bcrypt Passwords (Salt is handled automatically here)
-
-
-        if (!passwordEncoder.matches(loginDto.getPasswordLogin(), user.getPassword())) {
-            throw new RuntimeException("Invalid Password");
+    //
+    @Autowired
+    private JwtService JwtService;
+     //Check the password using String logic
+    public String loginUser(UserLoginDto loginDto) {
+        // 1. Fetch user by email
+        User user = userRepository.findByEmail(loginDto.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        // 2. Match raw password with hashed password from DB
+        // encoder.matches(rawPassword, hashedPassword)
+        if (encoder.matches(loginDto.getPassword(), user.getPassword())) {
+//            return "Login Sucessful!";
+            return JwtService.generateToken(user.getEmail());
+        } else {
+            return "Invalid Password!";
         }
-
-        // 3. Create Tokens (5 min access, 10 min refresh)
-        String accessToken = jwtService.generateToken(user.getEmail(), 5 * 60 * 1000);
-        String refreshToken = jwtService.generateToken(user.getEmail(), 10 * 60 * 1000);
-
-        return Map.of("access", accessToken, "refresh", refreshToken);
     }
-    public String refreshAccessToken(String refreshToken) {
-        // extractEmail will throw an exception if the 10 mins (refresh token) have passed
-        String email = jwtService.extractEmail(refreshToken);
 
-        // If we get here, the refresh token is valid. Generate a new 5-min access token.
-        return jwtService.generateToken(email, 5 * 60 * 1000);
-    }
+
+//        public boolean loginUser(UserLoginDto loginDto) {
+//            User user = userRepository.findByEmail(loginDto.getEmail()).orElse(null);
+//
+//            if (user == null) {
+//                return false;
+//            }
+//
+//            return encoder.matches(loginDto.getPassword(), user.getPassword());
+//        }
+//
+
+
 
 }
+
+
+
+
+
+

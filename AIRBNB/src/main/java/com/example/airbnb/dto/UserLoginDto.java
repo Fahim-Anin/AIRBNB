@@ -1,26 +1,22 @@
 package com.example.airbnb.dto;
 
+
 public class UserLoginDto {
+    private String email;
+    private String password;
 
 
-        private String email;
-        private String password;
-        // Getters and Setters
-
-    public String getEmailLogin() {
-
+    public String getEmail() {
         return email;
     }
-    public void setEmailLogin(String email) {
-        this.email = email;
-    }
 
-    public String getPasswordLogin() {
+    public void setEmail(String email) {
+        this.email = email;}
+    public String getPassword() {
         return password;
-    }
-    public void setPasswordLogin(String password) {
 
+    }
+    public void setPassword(String password) {
         this.password = password;
     }
-
 }
