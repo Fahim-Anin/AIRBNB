@@ -49,53 +49,73 @@ public class JwtService
 {
     private String secretKey= "";
 
-    //TO Generate Key
+//    Generate Key here
+//    This means Spring creates only one instance of JwtService when the application starts and keeps it in memory.
+//
+//  We put the key generation in the constructor so that the "key" is created once and only once.
     public JwtService()
     {
         try {
+            // 1. Initialize a 'factory' specifically for the HmacSHA256 algorithm.
             KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
+
+            // 2. Generate a high-entropy, cryptographically secure random key.
             SecretKey sk = keyGen.generateKey();
+
+            // 3. Convert the raw binary key into a Base64 String so we can store it
+            // in our 'secretKey' variable easily.
             secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
 
 
         }
         catch (NoSuchAlgorithmException e){
+            // If the JVM doesn't support the algorithm, we must stop the app.
             throw new RuntimeException(e);
         }
     }
 
+
+    /**
+     * HELPER METHOD: Translates our stored String back into a 'Key' object.
+     * We need this because the JJWT library cannot sign with a String;
+     * it needs a 'javax.crypto.SecretKey' object to perform the math.
+     */
     private Key getKey()
     {
-//        as hmacShakeyFor works on byte so we need to convert the secret key into
+//      // 1. Decode the Base64 string back into the original raw byte array.
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+//
+//        // 2. Wrap those bytes into a HMAC-specific Key object that the library understands.
+       return Keys.hmacShaKeyFor(keyBytes);
     }
 
 
-    public String generateToken(String useremail)
-    {
-       Map<String, Object> claims = new HashMap<>();
-       return Jwts.builder()
-               .claims()
-               .add(claims)
-               .subject(useremail)
-               .issuedAt(new Date(System.currentTimeMillis()))
-               .expiration(new Date(System.currentTimeMillis()  + 60 *60 * 10))
-               .and()
-               .signWith(getKey())
-               .compact();
+    public String generateToken(String useremail) {
+        // A Map to hold any extra data we want to hide in the token (e.g., Roles).
+        Map<String, Object> claims = new HashMap<>();
 
-
+        return Jwts.builder()
+                .claims()               // Start the Claims section.
+                .add(claims)            // Add our (currently empty) map.
+                .subject(useremail)     // Put the "Specific Element" (Identity) in the Payload.
+                .issuedAt(new Date(System.currentTimeMillis())) // Set the "Birth Date".
+                // Set "Expiration Date" (10 hours from now).
+                .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 1000 * 10))
+                .and()                  // Close Claims section and return to main Builder.
+                .signWith(getKey())     // CALLS getKey() to create the Digital Signature.
+                .compact();             // Combines Header.Payload.Signature into one String.
     }
 
 
     public String extractUsername(String token) {
         return Jwts.parser()
-                .verifyWith((SecretKey) getKey()) // Use the same key to unlock
+                .verifyWith((SecretKey) getKey()) // Uses the same 'Royal Seal' to unlock the box.
                 .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject(); // Returns the username/email you put in
+                .parseSignedClaims(token)         // Decodes the string and verifies the Signature.
+                .getPayload()                     // Grabs the data if (and only if) the signature is valid.
+                .getSubject();                    // Extracts the email we put in during generation.
     }
+
+
 
 }

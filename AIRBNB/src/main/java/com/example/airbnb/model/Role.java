@@ -1,6 +1,7 @@
 package com.example.airbnb.model;
 
 public enum Role {
-    ROLE_GUEST,
-    ROLE_HOST
+    ROLE_USER,
+    ROLE_OWNER,
+    ROLE_ADMIN,
 }
