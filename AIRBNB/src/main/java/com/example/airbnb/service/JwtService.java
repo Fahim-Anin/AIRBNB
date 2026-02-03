@@ -116,6 +116,14 @@ public class JwtService
                 .getSubject();                    // Extracts the email we put in during generation.
     }
 
+    public String extractRole(String token) {
+        return Jwts.parser()
+                .verifyWith((SecretKey) getKey()) // Uses the same 'Royal Seal' to unlock the box.
+                .build()
+                .parseSignedClaims(token)         // Decodes the string and verifies the Signature.
+                .getPayload()                     // Grabs the data if (and only if) the signature is valid.
+                .get("role", String.class);            // Extracts the role we put in during token generation
+    }
 
 
 }

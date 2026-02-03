@@ -36,40 +36,44 @@ public class JwtFilter extends OncePerRequestFilter { // Ensures this logic runs
             token = authHeader.substring(7);
 
             try {
-                // 4. We ask our Service to decode the token and find the 'sub' (email).
-                // If the signature is fake or the time is expired, this will throw an Exception.
+                // 4. INDUSTRY PRO-TIP: Extract EVERYTHING inside the try block.
+                // If the signature is fake or expired, extractUsername will throw an Exception.
                 userEmail = jwtService.extractUsername(token);
-                System.out.println(userEmail);
+
+                // If we reach this line, the token is 100% valid.
+                // Now we grab the Role and set our "Request Stickers".
+                String role = jwtService.extractRole(token);
+
+                // These stickers allow your Controller to see who is logged in and what they can do.
+                request.setAttribute("authenticatedUser", userEmail);
+                request.setAttribute("userRole", role);
+
+                System.out.println("Filter logged in user: " + userEmail + " with role: " + role);
+
             } catch (Exception e) {
-                // If it fails, we catch the error so the app doesn't crash.
-                // The request continues but 'username' stays null.
+                // If it fails (fake token), we catch the error so the app doesn't crash.
+                // The request continues but no attributes (stickers) are set.
+                System.out.println("Invalid Token detected: " + e.getMessage());
             }
         }
 
-        // 5. If extraction was successful, we now have a valid Identity.
-        if (userEmail!= null) {
-            // We store the username in the 'Request' object like a temporary sticker.
-            // This allows your Controller to see who is logged in later and sends authenticateduser to LoginController
-            request.setAttribute("authenticatedUser", userEmail);
-        }
-
-        // 6. CRITICAL: This line tells the request to move to the NEXT filter in line.
-        // If you forget this, the request will hang forever and never reach your Controller.
+        // 5. CRITICAL: This line tells the request to move to the NEXT filter in line.
+        // Even if there is NO token, we must call this so the request reaches the Controller.
         filterChain.doFilter(request, response);
     }
-//    If there is "No Token"
-//    If the filter checks the header and finds it empty:
-//
-//    The Code Skips the if: The logic inside if (authHeader != null...) is ignored.
-//
-//    Username stays null: The variable username remains empty.
-//
-//    No Attribute is Set: The line request.setAttribute("authenticatedUser", username) is never reached.
-//
-//    The Pass-Through: The filter hits filterChain.doFilter(request, response).
-//
-//    What happens next? The request simply continues down the "Conveyor Belt" to your Controller.
-//
-//    If the user is calling /login: This is perfect! The Controller takes the email/password, validates them, and then calls the JwtService to create a brand new token.
-//
+
+    /* RECAP OF THE FLOW FOR YOUR NOTES:
+
+      If there is "No Token" (e.g., calling /login):
+      - The 'if (authHeader != null...)' is skipped.
+      - userEmail stays null.
+      - No Attributes are set.
+      - filterChain.doFilter() sends the request forward.
+      - Result: The LoginController receives the request and generates a brand new token.
+
+      If there is a "Valid Token" (e.g., calling /property):
+      - The filter extracts Email and Role.
+      - Sets attributes "authenticatedUser" and "userRole".
+      - Result: The PropertyController reads the role and allows or blocks the user.
+    */
 }
