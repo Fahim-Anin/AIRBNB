@@ -90,14 +90,14 @@ public class JwtService
     }
 
 
-    public String generateToken(String useremail) {
+    public String generateToken(String userEmail, String role) {
         // A Map to hold any extra data we want to hide in the token (e.g., Roles).
         Map<String, Object> claims = new HashMap<>();
-
+        claims.put("role", role);
         return Jwts.builder()
                 .claims()               // Start the Claims section.
                 .add(claims)            // Add our (currently empty) map.
-                .subject(useremail)     // Put the "Specific Element" (Identity) in the Payload.
+                .subject(userEmail)     // Put the "Specific Element" (Identity) in the Payload.
                 .issuedAt(new Date(System.currentTimeMillis())) // Set the "Birth Date".
                 // Set "Expiration Date" (10 hours from now).
                 .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 1000 * 10))

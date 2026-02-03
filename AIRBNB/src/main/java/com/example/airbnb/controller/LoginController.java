@@ -73,7 +73,8 @@ public class LoginController {
 
         @PostMapping("/login")
         public ResponseEntity<String> login(@RequestBody UserLoginDto loginDto, HttpServletRequest request) {
-            // 1. FILTER 1: Check if JwtFilter already validated a token
+            // 1. FILTER 1: Check if JwtFilter already validated a token and get this from
+//            request.setAttribute("authenticatedUser", userEmail); if this authenticated user is not got then go to try block
             String existingUser = (String) request.getAttribute("authenticatedUser");
             if (existingUser != null) {
                 return ResponseEntity.ok("Already Logged In as: " + existingUser);

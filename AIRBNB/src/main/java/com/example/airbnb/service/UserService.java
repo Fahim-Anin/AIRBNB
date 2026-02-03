@@ -68,7 +68,10 @@ public class UserService {
 
             return "Fail: Email, Password, or Full Name, role cannot be empty!";
       }
-
+      if(userRepository.existsByEmail(dto.getEmail()))
+      {
+          return "Fail: Email already exists!";
+      }
         // 2. Create the actual Entity object
         User user = new User();
         user.setEmail(dto.getEmail());
@@ -92,6 +95,13 @@ public class UserService {
     private JwtService JwtService;
      //Check the password using String logic
     public String loginUser(UserLoginDto loginDto) {
+
+//    JWTFilter check the token and If there is "No Token" then in JWTFILTER:
+//    No Attribute is Set: The line request.setAttribute("authenticatedUser", username) is never reached.
+//    The Pass-Through: The filter hits filterChain.doFilter(request, response).
+//    What happens next? The request simply continues down the "Conveyor Belt" to your Controller.
+//    If the user is calling /login: This is perfect! The Controller takes the email/password, validates them, and then calls the JwtService to create a brand new token.
+
         // 1. Fetch user by email
         User user = userRepository.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -99,7 +109,8 @@ public class UserService {
         // encoder.matches(rawPassword, hashedPassword)
         if (encoder.matches(loginDto.getPassword(), user.getPassword())) {
 //            return "Login Sucessful!";
-            return JwtService.generateToken(user.getEmail());
+            // we need to send the role and email to generate the token.
+            return JwtService.generateToken(user.getEmail(), user.getRole().toString());
         } else {
             return "Invalid Password!";
         }
