@@ -6,6 +6,7 @@ import com.example.airbnb.model.User;
 import com.example.airbnb.repository.PropertyRepository;
 import com.example.airbnb.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,20 +18,21 @@ public class PropertyService {
     @Autowired
     private UserRepository userRepository;
 
-    public void addpropertyservice(AddPropertyDTO propertydto, String userEmail) {
-        // 1. Find the User object from the DB using the email from the token
-        // If the user doesn't exist (very rare since token was valid), we throw an error
-        User owner = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
+    public void addpropertyservice(AddPropertyDTO dto, String email) {
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        System.out.println(owner);
+        // Refined Logic: Duplicate only if same name AND same owner
+        if (propertyRepository.existsByNameAndOwner(dto.getPropertyName(), owner)) {
+            // Throwing an exception is cleaner than returning a string
+            throw new RuntimeException("Duplicate Property: You already have a listing with this name");
+        }
+
         Property property = new Property();
-        // 3. Set the OWNER object (Hibernate will automatically extract the ID for the foreign key)
         property.setOwner(owner);
-        property.setName(propertydto.getPropertyName());
-        property.setPrice(propertydto.getPropertyValue());
+        property.setName(dto.getPropertyName());
+        property.setPrice(dto.getPropertyValue());
         propertyRepository.save(property);
-
     }
 
 }

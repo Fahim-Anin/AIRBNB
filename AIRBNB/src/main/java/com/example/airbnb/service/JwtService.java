@@ -107,7 +107,7 @@ public class JwtService
     }
 
 
-    public String extractUsername(String token) {
+    public String extractUserEmail(String token) {
         return Jwts.parser()
                 .verifyWith((SecretKey) getKey()) // Uses the same 'Royal Seal' to unlock the box.
                 .build()

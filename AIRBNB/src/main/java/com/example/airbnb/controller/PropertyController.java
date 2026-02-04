@@ -20,18 +20,18 @@ public class PropertyController {
         String email = (String) request.getAttribute("authenticatedUser");
         String role = (String) request.getAttribute("userRole");
 
-        // 1. Check Authentication (Are they even logged in?)
-        if (email == null) {
-            return ResponseEntity.status(401).body("User is not logged in");
+        if (email == null) return ResponseEntity.status(401).body("Not logged in");
+        if (!"ROLE_OWNER".equals(role))
+        {
+            return ResponseEntity.status(403).body("Unauthorized Role");
         }
 
-        // 2. Check Authorization (Are they an OWNER?)
-        if ("ROLE_OWNER".equals(role)) {
+        try {
             propertyService.addpropertyservice(addProperty, email);
-            return ResponseEntity.ok("Successfully added property by " + email);
-        } else {
-            // 3. Forbidden (Logged in, but wrong role)
-            return ResponseEntity.status(403).body("Only Owners can add properties! Your role is: " + role);
+            return ResponseEntity.ok("Successfully added property!");
+        } catch (RuntimeException e) {
+            // This catches the "Duplicate Property" message from the service
+            return ResponseEntity.status(409).body(e.getMessage()); // 409 = Conflict
         }
     }
 }

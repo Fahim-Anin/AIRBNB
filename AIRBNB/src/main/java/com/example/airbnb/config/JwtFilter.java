@@ -23,6 +23,7 @@ public class JwtFilter extends OncePerRequestFilter { // Ensures this logic runs
 
         // 1. We grab the "Authorization" string from the HTTP Header.
         // In Postman, this is where you put "Bearer <token>".
+        // The filter pulls Bearer eyJhbG... from the request.
         String authHeader = request.getHeader("Authorization");
 
         String token = null;
@@ -33,18 +34,27 @@ public class JwtFilter extends OncePerRequestFilter { // Ensures this logic runs
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
             // 3. We cut off the first 7 characters ("Bearer ") to get only the raw JWT string.
+            // It strips "Bearer " to get the raw JWT.
             token = authHeader.substring(7);
 
             try {
                 // 4. INDUSTRY PRO-TIP: Extract EVERYTHING inside the try block.
                 // If the signature is fake or expired, extractUsername will throw an Exception.
-                userEmail = jwtService.extractUsername(token);
+                // JwtService decodes the token, verifies the signature from the extractUserEmail method, and returns "owner@gmail.com".
+                userEmail = jwtService.extractUserEmail(token);
 
                 // If we reach this line, the token is 100% valid.
                 // Now we grab the Role and set our "Request Stickers".
+                // JwtService looks inside the claims for the "role" key and returns "ROLE_OWNER"
                 String role = jwtService.extractRole(token);
 
                 // These stickers allow your Controller to see who is logged in and what they can do.
+                // The folder first arrives at the Security Desk (JwtFilter).
+                // The guard opens the folder, finds a "Keycard" (the Token), and verifies it.
+                // The guard doesn't want to re-verify the token every time, so they take a Post-it Note (Attribute), write the email 2@gmail.com on it, and stick it to the front of the folder.
+                // The guard gives the label a name: "authenticatedUser".
+               //  The folder then moves to the Manager's Office (PropertyController).
+               //  The Manager doesn't know how to verify tokens. They just look at the folder, see the Post-it Note named "authenticatedUser", and say: "Ah, I see this folder belongs to 2@gmail.com!"
                 request.setAttribute("authenticatedUser", userEmail);
                 request.setAttribute("userRole", role);
 
@@ -59,6 +69,7 @@ public class JwtFilter extends OncePerRequestFilter { // Ensures this logic runs
 
         // 5. CRITICAL: This line tells the request to move to the NEXT filter in line.
         // Even if there is NO token, we must call this so the request reaches the Controller.
+        // The guard opens the gate and lets the request move forward to the Controller.
         filterChain.doFilter(request, response);
     }
 

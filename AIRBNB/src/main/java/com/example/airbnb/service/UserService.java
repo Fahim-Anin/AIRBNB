@@ -64,11 +64,11 @@ public class UserService {
             if (dto.getEmail() == null || dto.getEmail().isEmpty() ||
                 dto.getPassword() == null || dto.getPassword().isEmpty() ||
                 dto.getFullName() == null || dto.getFullName().isEmpty() ||
-                 dto.getRole() == null) {
-
+                 dto.getRole() == null)
+            {
             return "Fail: Email, Password, or Full Name, role cannot be empty!";
       }
-      if(userRepository.existsByEmail(dto.getEmail()))
+            if(userRepository.existsByEmail(dto.getEmail()))
       {
           return "Fail: Email already exists!";
       }
