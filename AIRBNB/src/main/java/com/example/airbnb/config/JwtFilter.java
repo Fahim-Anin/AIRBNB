@@ -1,6 +1,8 @@
 package com.example.airbnb.config;
 
 import com.example.airbnb.service.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+import java.security.SignatureException;
 
 // @Component tells Spring: "Create this filter and plug it into the security line automatically."
 @Component
@@ -60,17 +63,45 @@ public class JwtFilter extends OncePerRequestFilter { // Ensures this logic runs
 
                 System.out.println("Filter logged in user: " + userEmail + " with role: " + role);
 
+            } catch (ExpiredJwtException e) {
+//                Every JWT has a payload field called exp. When jwtService.extractUserEmail(token) is called, the JJWT library compares the current system time to the exp time in the token.
+//
+//                The Logic: If System.currentTimeMillis() is greater than the exp value, the library immediately throws this specific exception.
+//
+//                The Industry Result: You catch it, send a 401 Unauthorized status, and tell the user, "Your session has expired." This forces them to log in again to get a fresh token.
+                // Handle Expired Token
+                // First Time The "blank envelope" as Response going back to the user.
+                handleFilterError(response, "Your session has expired. Please login again.", HttpServletResponse.SC_UNAUTHORIZED);
+                // SC stands for Status Code. SC_UNAUTHORIZED is just a fancy name for the number 40
+                // writes the "Session Expired" message into the response object.
+                return; // STOP: Do not call filterChain.doFilter() //the filter stops. It never calls the PropertyController
+                // travels back through the internet to Postman.
+
+
             } catch (Exception e) {
-                // If it fails (fake token), we catch the error so the app doesn't crash.
-                // The request continues but no attributes (stickers) are set.
-                System.out.println("Invalid Token detected: " + e.getMessage());
+                // Handle any other unexpected security errors
+                handleFilterError(response, "Authentication error: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                return; // STOP
             }
+
         }
 
         // 5. CRITICAL: This line tells the request to move to the NEXT filter in line.
         // Even if there is NO token, we must call this so the request reaches the Controller.
         // The guard opens the gate and lets the request move forward to the Controller.
         filterChain.doFilter(request, response);
+
+
+    }
+
+    private void handleFilterError(HttpServletResponse response, String message, int status) throws IOException {
+        response.setStatus(status); // This sets the "Header" of the response to 401. Postman sees this and turns the status indicator Red.
+
+        response.setContentType("application/json");
+        // This tells Postman, "Hey, I'm not sending you a webpage (HTML), I'm sending you a JSON object." This allows Postman to format the text nicely.
+        // Using a JSON format so front-end apps can parse the error easily
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
+        // This opens the "pipe" to the user's screen and pushes the text {"error": "Your session has expired..."} through it
     }
 
     /* RECAP OF THE FLOW FOR YOUR NOTES:

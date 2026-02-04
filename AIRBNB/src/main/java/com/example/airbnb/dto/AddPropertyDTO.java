@@ -1,7 +1,13 @@
 package com.example.airbnb.dto;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+
 public class AddPropertyDTO {
+    @NotBlank(message = "Property name cannot be empty")
     private String propertyName;
+
+    @Min(value = 1, message = "Price must be greater than zero")
     private int propertyValue;
 
     public AddPropertyDTO() {

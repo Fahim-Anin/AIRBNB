@@ -3,6 +3,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.aspectj.weaver.bcel.UnwovenClassFileWithThirdPartyManagedBytecode;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.KeyGenerator;
@@ -43,37 +44,42 @@ import java.util.Map;
 //                .getSubject();
 //    }
 //}
-
+import org.springframework.beans.factory.annotation.Value;
 @Service
 public class JwtService
 {
-    private String secretKey= "";
 
-//    Generate Key here
-//    This means Spring creates only one instance of JwtService when the application starts and keeps it in memory.
+//    Raw way to generate secret key:-
+
+//    private String secretKey= "";
 //
-//  We put the key generation in the constructor so that the "key" is created once and only once.
-    public JwtService()
-    {
-        try {
-            // 1. Initialize a 'factory' specifically for the HmacSHA256 algorithm.
-            KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
+////    Generate Key here
+////    This means Spring creates only one instance of JwtService when the application starts and keeps it in memory.
+////
+////  We put the key generation in the constructor so that the "key" is created once and only once.
+//    public JwtService()
+//    {
+//        try {
+//            // 1. Initialize a 'factory' specifically for the HmacSHA256 algorithm.
+//            KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
+//
+//            // 2. Generate a high-entropy, cryptographically secure random key.
+//            SecretKey sk = keyGen.generateKey();
+//
+//            // 3. Convert the raw binary key into a Base64 String so we can store it
+//            // in our 'secretKey' variable easily.
+//            secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
+//
+//
+//        }
+//        catch (NoSuchAlgorithmException e){
+//            // If the JVM doesn't support the algorithm, we must stop the app.
+//            throw new RuntimeException(e);
+//        }
+//    }
 
-            // 2. Generate a high-entropy, cryptographically secure random key.
-            SecretKey sk = keyGen.generateKey();
-
-            // 3. Convert the raw binary key into a Base64 String so we can store it
-            // in our 'secretKey' variable easily.
-            secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
-
-
-        }
-        catch (NoSuchAlgorithmException e){
-            // If the JVM doesn't support the algorithm, we must stop the app.
-            throw new RuntimeException(e);
-        }
-    }
-
+@Value("${jwt.secret}")
+private String secretKey; // Spring injects the fixed key from properties
 
     /**
      * HELPER METHOD: Translates our stored String back into a 'Key' object.
@@ -100,7 +106,7 @@ public class JwtService
                 .subject(userEmail)     // Put the "Specific Element" (Identity) in the Payload.
                 .issuedAt(new Date(System.currentTimeMillis())) // Set the "Birth Date".
                 // Set "Expiration Date" (10 hours from now).
-                .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 1000 * 10))
+                .expiration(new Date(System.currentTimeMillis() +  10 * 1000))
                 .and()                  // Close Claims section and return to main Builder.
                 .signWith(getKey())     // CALLS getKey() to create the Digital Signature.
                 .compact();             // Combines Header.Payload.Signature into one String.
