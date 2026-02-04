@@ -93,7 +93,27 @@ public class JwtFilter extends OncePerRequestFilter { // Ensures this logic runs
 
 
     }
+    // HttpServletResponse response: This is the "Transmission Pipe" that leads directly back to the user's Postman or Browser.
+    // String message: The actual text you want the user to read (e.g., "Your session has expired").
+    // int status: The HTTP status code number (like 401, 403, or 500).
 
+//    Line 1: response.setStatus(status);
+//    Action: Stamps the "Header" of the response.
+//            Effect: In Postman, this is what makes the little status box turn Red and say 401 Unauthorized. It doesn't put text on the screen; it sets the "mood" of the response.
+
+//    Line 2: response.setContentType("application/json");
+//    Action: Tells the receiver what type of data is coming.
+//            Effect: Without this, Postman might think you are sending a plain text file or a website. By setting it to application/json, Postman knows to use "Pretty Print" so the error looks professional.
+
+//    Line 3: response.getWriter().write("{\"error\": \"" + message + "\"}");
+//    Action: The "Ink on Paper" moment.
+//            response.getWriter(): Opens the stream (the pen).
+//            .write(...): Writes the actual JSON string.
+//    The Result: It constructs a valid JSON object like {"error": "Your session has expired"} and sends it down the pipe.
+
+//    throws IOException:
+//    The getWriter() method interacts with the network. If the user suddenly closes their laptop or loses internet while your server is trying to write the message,
+//    the "pipe" breaks. Java calls this an Input/Output Exception. Since we can't "fix" a broken internet connection, we simply say throws IOException to tell Java, "If the pipe breaks, let the system handle it."
     private void handleFilterError(HttpServletResponse response, String message, int status) throws IOException {
         response.setStatus(status); // This sets the "Header" of the response to 401. Postman sees this and turns the status indicator Red.
 
