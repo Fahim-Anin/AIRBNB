@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="com.example.airbnb.AirbnbApplication " type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="AIRBNB" />
+    <option name="SPRING_BOOT_MAIN_CLASS" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
