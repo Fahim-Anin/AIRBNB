@@ -72,9 +72,26 @@ public class UserService {
       }
         // 2. Create the actual Entity object
         User user = new User();
-        user.setEmail(dto.getEmail());
-        user.setFullName(dto.getFullName());
-        user.setRole(Role.valueOf(dto.getRole())); // Convert the String from DTO into the Role Enum
+        try{
+            user.setEmail(dto.getEmail());
+        }
+        catch(IllegalArgumentException e) {
+            return "Fail: Invalid Email name provided!";
+        }
+        try {
+            user.setFullName(dto.getFullName());
+        }
+
+        catch(IllegalArgumentException e) {
+            return "Fail: Invalid Full name provided!";
+        }
+        try {
+                user.setRole(Role.valueOf(dto.getRole().toUpperCase().trim()));
+            }
+        catch (IllegalArgumentException e) {
+                return "Fail: Invalid Role name provided!";
+            }
+//        user.setRole(Role.valueOf(dto.getRole())); // Convert the String from DTO into the Role Enum
 
         // 3. Hash the password from the DTO
         user.setPassword(encoder.encode(dto.getPassword()));

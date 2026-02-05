@@ -106,7 +106,7 @@ private String secretKey; // Spring injects the fixed key from properties
                 .subject(userEmail)     // Put the "Specific Element" (Identity) in the Payload.
                 .issuedAt(new Date(System.currentTimeMillis())) // Set the "Birth Date".
                 // Set "Expiration Date" (10 hours from now).
-                .expiration(new Date(System.currentTimeMillis() +  10 * 1000))
+                .expiration(new Date(System.currentTimeMillis() + 5* 60 * 1000))
                 .and()                  // Close Claims section and return to main Builder.
                 .signWith(getKey())     // CALLS getKey() to create the Digital Signature.
                 .compact();             // Combines Header.Payload.Signature into one String.
