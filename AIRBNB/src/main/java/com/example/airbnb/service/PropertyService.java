@@ -32,6 +32,7 @@ public class PropertyService {
         property.setOwner(owner);
         property.setName(dto.getPropertyName());
         property.setPrice(dto.getPropertyValue());
+
         propertyRepository.save(property);
     }
 
